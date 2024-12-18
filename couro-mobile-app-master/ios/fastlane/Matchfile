@@ -1,0 +1,6 @@
+git_url("https://github.com/HusnainIzhar/certificates.git")
+type("appstore")
+app_identifier(["com.builtwithsutro.couro"])
+username("zakriyakareem481@gmail.com")
+keychain_name("login.keychain")
+keychain_password("your-keychain-password")

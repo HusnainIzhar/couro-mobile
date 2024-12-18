@@ -1,0 +1,52 @@
+name: Deploy to App Store
+
+on:
+  workflow_call:
+
+jobs:
+  deployIos:
+    runs-on: macos-latest
+    env:
+      FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+      APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install NPM Dependencies
+        run: npm install
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+  
+      - name: Install Pods
+        working-directory: ios
+        run: pod install
+  
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: ios
+  
+      - name: Install Bundler Dependencies
+        working-directory: ios
+        run: bundle install
+
+      - name: Setup app store connect
+        run: echo $APP_STORE_CONNECT_API_KEY | base64
+
+      - name: Build and Deploy to TestFlight
+        working-directory: ios
+        run: bundle exec fastlane ios beta

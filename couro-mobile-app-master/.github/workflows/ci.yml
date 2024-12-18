@@ -1,0 +1,44 @@
+name: Build and Deploy iOS App to App Store
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - name: Install Fastlane and CocoaPods
+        run: |
+          sudo gem install fastlane
+          sudo gem install cocoapods
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install npm Dependencies
+        run: npm install
+
+      - name: Install CocoaPods Dependencies
+        working-directory: ios
+        run: pod install
+
+      - name: Build and Deploy iOS App
+        working-directory: ios
+        run: fastlane release
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          FASTLANE_SESSION: ${{ secrets.FASTLANE_SESSION }}
